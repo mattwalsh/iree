@@ -28,12 +28,12 @@ class NonDeviceHalTest(unittest.TestCase):
 
     # Enum and/or operations on BufferUsage.
     self.assertEqual(
-        iree.runtime.BufferUsage.CONSTANT | iree.runtime.BufferUsage.TRANSFER,
-        int(iree.runtime.BufferUsage.CONSTANT) |
-        int(iree.runtime.BufferUsage.TRANSFER))
+        iree.runtime.BufferUsage.TRANSFER | iree.runtime.BufferUsage.MAPPING,
+        int(iree.runtime.BufferUsage.TRANSFER) |
+        int(iree.runtime.BufferUsage.MAPPING))
     self.assertEqual(
-        iree.runtime.BufferUsage.CONSTANT & iree.runtime.BufferUsage.CONSTANT,
-        int(iree.runtime.BufferUsage.CONSTANT))
+        iree.runtime.BufferUsage.TRANSFER & iree.runtime.BufferUsage.TRANSFER,
+        int(iree.runtime.BufferUsage.TRANSFER))
 
     # Enum and/or operations on MemoryAccess.
     self.assertEqual(
@@ -82,9 +82,8 @@ class DeviceHalTest(unittest.TestCase):
   def testQueryCompatibility(self):
     compat = self.allocator.query_compatibility(
         memory_type=iree.runtime.MemoryType.DEVICE_LOCAL,
-        allowed_usage=iree.runtime.BufferUsage.CONSTANT,
-        intended_usage=iree.runtime.BufferUsage.CONSTANT |
-        iree.runtime.BufferUsage.TRANSFER,
+        allowed_usage=iree.runtime.BufferUsage.DEFAULT,
+        intended_usage=iree.runtime.BufferUsage.DEFAULT,
         allocation_size=1024)
     print("COMPAT:", compat)
     self.assertTrue(
@@ -100,7 +99,7 @@ class DeviceHalTest(unittest.TestCase):
   def testAllocateBuffer(self):
     buffer = self.allocator.allocate_buffer(
         memory_type=iree.runtime.MemoryType.DEVICE_LOCAL,
-        allowed_usage=iree.runtime.BufferUsage.CONSTANT,
+        allowed_usage=iree.runtime.BufferUsage.DEFAULT,
         allocation_size=13)
     print("BUFFER:", buffer)
 
@@ -108,7 +107,7 @@ class DeviceHalTest(unittest.TestCase):
     ary = np.zeros([3, 4], dtype=np.int32) + 2
     buffer = self.allocator.allocate_buffer_copy(
         memory_type=iree.runtime.MemoryType.DEVICE_LOCAL,
-        allowed_usage=iree.runtime.BufferUsage.CONSTANT,
+        allowed_usage=iree.runtime.BufferUsage.DEFAULT,
         buffer=ary)
     self.assertEqual(
         repr(buffer),
@@ -119,7 +118,7 @@ class DeviceHalTest(unittest.TestCase):
     ary = np.zeros([3, 4], dtype=np.int32) + 2
     buffer = self.allocator.allocate_buffer_copy(
         memory_type=iree.runtime.MemoryType.DEVICE_LOCAL,
-        allowed_usage=iree.runtime.BufferUsage.CONSTANT,
+        allowed_usage=iree.runtime.BufferUsage.DEFAULT,
         buffer=ary,
         element_type=iree.runtime.HalElementType.SINT_32)
     self.assertEqual(
